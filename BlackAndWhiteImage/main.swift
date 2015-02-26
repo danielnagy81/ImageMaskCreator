@@ -8,87 +8,116 @@
 
 import Cocoa
 
-let inputArguments = Process.arguments
-var threshold: CGFloat = 0.1
-var searchColor = NSColor(red: 0, green: 0, blue: 0, alpha: 1)
-
-if inputArguments.count == 2 || inputArguments.count == 6 || inputArguments.count == 7 {
-    let pathURL =  NSURL(fileURLWithPath: inputArguments[1])
+class ImageMaskCreator {
     
-    if inputArguments.count == 6 || inputArguments.count == 7 {
-        let red = inputArguments[2].toInt()
-        let green = inputArguments[3].toInt()
-        let blue = inputArguments[4].toInt()
-        let alpha = inputArguments[5].toInt()
-        
-        if red != nil && green != nil && blue != nil && alpha != nil {
-            searchColor = NSColor(red: CGFloat(red!) / 255, green: CGFloat(green!) / 255, blue: CGFloat(blue!) / 255, alpha: CGFloat(alpha!) / 255)
-        }
+    private var searchColor = NSColor(red: 0, green: 0, blue: 0, alpha: 1)
+    private var threshold: CGFloat = 0.1
+    private let inputArguments: [String]
+    
+    init(inputArguments: [String]) {
+        self.inputArguments = inputArguments
     }
     
-    if inputArguments.count == 7 {
-        threshold = CGFloat((inputArguments[6] as NSString).floatValue)
+    func createImageMask() {
+        setupInputArguments()
+        createImageFromPath(inputArguments[1])
     }
     
-    if let validURL = pathURL {
-        let image = NSImage(contentsOfURL: validURL)
-        
-        if let foundImage = image {
-
-            if let tiffData = foundImage.TIFFRepresentation {
+    private func setupInputArguments() {
+        if inputArguments.count == 2 || inputArguments.count == 6 || inputArguments.count == 7 {
+            
+            if inputArguments.count == 6 || inputArguments.count == 7 {
+                let red = inputArguments[2].toInt()
+                let green = inputArguments[3].toInt()
+                let blue = inputArguments[4].toInt()
+                let alpha = inputArguments[5].toInt()
                 
-                if let imageRepresentation = NSBitmapImageRep(data: tiffData) {
-                    println("\nProcessing image started! Please wait, this might take a while...\n")
-
-                    let pixelHigh = imageRepresentation.pixelsHigh - 1
-                    let loadingPercentage = pixelHigh / 10
-                    var nextStep = loadingPercentage
-                    
-                    for y in 0...pixelHigh {
-                        
-                        for x in 0...imageRepresentation.pixelsWide - 1 {
-                        
-                            let colorAtPixel = imageRepresentation.colorAtX(x, y: y)!
-                            let isSameColor = (abs(colorAtPixel.redComponent - searchColor.redComponent) < threshold) && (abs(colorAtPixel.greenComponent - searchColor.greenComponent) < threshold) && (abs(colorAtPixel.blueComponent - searchColor.blueComponent) < threshold)
-                            
-                            if isSameColor {
-                                let p = UnsafeMutablePointer<Int>.alloc(4)
-                                p.initialize(0)
-                                p.successor().initialize(0)
-                                p.successor().successor().initialize(0)
-                                p.successor().successor().successor().initialize(255)
-                                imageRepresentation.setPixel(p, atX: x, y: y)
-                            } else {
-                                let p = UnsafeMutablePointer<Int>.alloc(4)
-                                p.initialize(255)
-                                p.successor().initialize(255)
-                                p.successor().successor().initialize(255)
-                                p.successor().successor().successor().initialize(255)
-                                imageRepresentation.setPixel(p, atX: x, y: y)
-                            }
-                        }
-                    }
-                    
-                    let newFileName = inputArguments[1].componentsSeparatedByString(".")[0] + "_blackAndWhite" + ".tiff"
-                    let saveSuccess = imageRepresentation.TIFFRepresentation!.writeToFile(newFileName, atomically: false)
-                    
-                    if saveSuccess {
-                        println("SUCCESS!\n\nNew black and white image created at \(newFileName)\n")
-                    } else {
-                        println("\nThere was an error at saving, new file cannot be created :'(\n")
-                    }
-                } else {
-                    println("\nImage representation cannot be created :'(\n")
+                if red != nil && green != nil && blue != nil && alpha != nil {
+                    searchColor = NSColor(red: CGFloat(red!) / 255, green: CGFloat(green!) / 255, blue: CGFloat(blue!) / 255, alpha: CGFloat(alpha!) / 255)
                 }
-            } else {
-                println("\nTiff data could not be created :'(\n")
+            }
+            
+            if inputArguments.count == 7 {
+                threshold = CGFloat((inputArguments[6] as NSString).floatValue)
             }
         } else {
-            println("\nImage not found :'(\n")
+            println("\nToo many/not enough input arguments given :'(\n")
         }
-    } else {
-        println("\nThe given path is not valid :'(\n")
     }
-} else {
-    println("\nToo many/not enough input arguments given :'(\n")
+    
+    private func createImageFromPath(path: String) {
+        let pathURL =  NSURL(fileURLWithPath: path)
+        if let validURL = pathURL {
+            let image = NSImage(contentsOfURL: validURL)
+            
+            if let foundImage = image {
+                createImageDataFromImage(foundImage)
+            } else {
+                println("\nImage not found :'(\n")
+            }
+        } else {
+            println("\nThe given path is not valid :'(\n")
+        }
+    }
+    
+    private func createImageDataFromImage(image: NSImage) {
+        if let tiffData = image.TIFFRepresentation {
+            let imageRepresentation = startProcessWithData(tiffData)
+            saveImageRepresentation(imageRepresentation)
+        } else {
+            println("\nTiff data could not be created :'(\n")
+        }
+    }
+    
+    private func startProcessWithData(tiffData: NSData) -> NSBitmapImageRep? {
+        if let imageRepresentation = NSBitmapImageRep(data: tiffData) {
+            println("\nProcessing image started! Please wait, this might take a while...\n")
+            return iterateThroughPixelsOfImageRepresentation(imageRepresentation)
+        } else {
+            println("\nImage representation cannot be created :'(\n")
+            return nil
+        }
+    }
+    
+    private func saveImageRepresentation(imageRepresentation: NSBitmapImageRep?) {
+        let newFileName = inputArguments[1].componentsSeparatedByString(".")[0] + "_blackAndWhite" + ".tiff"
+        let saveSuccess = imageRepresentation?.TIFFRepresentation!.writeToFile(newFileName, atomically: false)
+        
+        if saveSuccess != nil && saveSuccess == true {
+            println("SUCCESS!\n\nNew black and white image created at \(newFileName)\n")
+        } else {
+            println("\nThere was an error at saving, new file cannot be created :'(\n")
+        }
+    }
+    
+    private func iterateThroughPixelsOfImageRepresentation(imageRepresentation: NSBitmapImageRep) -> NSBitmapImageRep {
+        for y in 0...imageRepresentation.pixelsHigh - 1 {
+            for x in 0...imageRepresentation.pixelsWide - 1 {
+                setBlackOrWhitePixelOfImageRepresentation(imageRepresentation, x: x, atY: y)
+            }
+        }
+        return imageRepresentation
+    }
+    
+    private func setBlackOrWhitePixelOfImageRepresentation(imageRepresentation: NSBitmapImageRep, x: Int, atY y: Int) -> NSBitmapImageRep {
+        let colorAtPixel = imageRepresentation.colorAtX(x, y: y)!
+        let isSameColor = (abs(colorAtPixel.redComponent - searchColor.redComponent) < threshold) && (abs(colorAtPixel.greenComponent - searchColor.greenComponent) < threshold) && (abs(colorAtPixel.blueComponent - searchColor.blueComponent) < threshold)
+        isSameColor ? modifyImageRepresentation(imageRepresentation, atX: x, atY: y, withRed: 0, green: 0, blue: 0, alpha: 255) : modifyImageRepresentation(imageRepresentation, atX: x, atY: y, withRed: 255, green: 255, blue: 255, alpha: 255)
+        return imageRepresentation
+    }
+    
+    private func modifyImageRepresentation(imageRepresentation: NSBitmapImageRep, atX x: Int, atY y: Int, withRed red: Int, green: Int, blue: Int, alpha: Int) {
+        let p = UnsafeMutablePointer<Int>.alloc(4)
+        p.initialize(red)
+        p.successor().initialize(green)
+        p.successor().successor().initialize(blue)
+        p.successor().successor().successor().initialize(alpha)
+        imageRepresentation.setPixel(p, atX: x, y: y)
+        p.destroy(4)
+        p.dealloc(4)
+    }
 }
+
+let inputArguments = Process.arguments
+let maskCreator = ImageMaskCreator(inputArguments: inputArguments)
+maskCreator.createImageMask()
