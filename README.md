@@ -3,11 +3,11 @@
 A basic command line tool for creating image masks based on one color.
 
 ### You can make it work by:
-  * open terminal
-  * navigate to the folder which contains the main.swift file
-  * type: swift main.swift *arguments*
-  * insert the proper arguments to *arguments*
-  * the mask image will be created in the same directory where to original image is stored,
+  1. open terminal
+  2. navigate to the folder which contains the main.swift file
+  3. type: swift main.swift *arguments*
+  4. insert the proper arguments to *arguments*
+  5. the mask image will be created in the same directory where to original image is stored,
 		with a *original_image_name*_blackAndWhite.tiff name modification.
 	
 ### The arguments can be:
