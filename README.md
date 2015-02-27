@@ -19,3 +19,13 @@ A basic command line tool for creating image masks based on one color.
 		like "0.2". It can be between 0.0 and 1.0. The default value is 0.1.
 		
 
+
+## Example
+
+**Original image:**
+![Alt text](https://raw.githubusercontent.com/danielnagy81/ImageMaskCreator/master/Example/1.png "Original image")
+
+**Calling ImageMaskCreator:** swift main.swift /my_path_to_the_image/1.png 251 202 175 255
+
+**Output image:**
+![Alt text](https://raw.githubusercontent.com/danielnagy81/ImageMaskCreator/master/Example/1_blackAndWhite.png "Mask image")
