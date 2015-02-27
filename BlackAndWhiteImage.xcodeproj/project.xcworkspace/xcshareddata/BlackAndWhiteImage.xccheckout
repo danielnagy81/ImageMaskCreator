@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>FFD74459-B92D-4114-9AF3-51E1A8A16C82</string>
+	<key>IDESourceControlProjectName</key>
+	<string>BlackAndWhiteImage</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>2FDFBF9ED9946018F02243E2ADCE5CF68318C563</key>
+		<string>https://github.com/danielnagy81/ImageMaskCreator.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>BlackAndWhiteImage.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>2FDFBF9ED9946018F02243E2ADCE5CF68318C563</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/danielnagy81/ImageMaskCreator.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>2FDFBF9ED9946018F02243E2ADCE5CF68318C563</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>2FDFBF9ED9946018F02243E2ADCE5CF68318C563</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ImageMaskCreator</string>
+		</dict>
+	</array>
+</dict>
+</plist>
