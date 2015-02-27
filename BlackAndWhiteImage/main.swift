@@ -14,8 +14,21 @@ class ImageMaskCreator {
     private var threshold: CGFloat = 0.1
     private let inputArguments: [String]
     
+    private let foundColorPointer: UnsafeMutablePointer<Int>
+    private let otherColorsPointer: UnsafeMutablePointer<Int>
+    
     init(inputArguments: [String]) {
         self.inputArguments = inputArguments
+        foundColorPointer = UnsafeMutablePointer<Int>.alloc(4)
+        foundColorPointer.initialize(0)
+        foundColorPointer.successor().initialize(0)
+        foundColorPointer.successor().successor().initialize(0)
+        foundColorPointer.successor().successor().successor().initialize(255)
+        otherColorsPointer = UnsafeMutablePointer<Int>.alloc(4)
+        otherColorsPointer.initialize(255)
+        otherColorsPointer.successor().initialize(255)
+        otherColorsPointer.successor().successor().initialize(255)
+        otherColorsPointer.successor().successor().successor().initialize(255)
     }
     
     func createImageMask() {
@@ -96,25 +109,22 @@ class ImageMaskCreator {
                 setBlackOrWhitePixelOfImageRepresentation(imageRepresentation, x: x, atY: y)
             }
         }
+        cleanUpPointers()
         return imageRepresentation
     }
     
     private func setBlackOrWhitePixelOfImageRepresentation(imageRepresentation: NSBitmapImageRep, x: Int, atY y: Int) -> NSBitmapImageRep {
         let colorAtPixel = imageRepresentation.colorAtX(x, y: y)!
         let isSameColor = (abs(colorAtPixel.redComponent - searchColor.redComponent) < threshold) && (abs(colorAtPixel.greenComponent - searchColor.greenComponent) < threshold) && (abs(colorAtPixel.blueComponent - searchColor.blueComponent) < threshold)
-        isSameColor ? modifyImageRepresentation(imageRepresentation, atX: x, atY: y, withRed: 0, green: 0, blue: 0, alpha: 255) : modifyImageRepresentation(imageRepresentation, atX: x, atY: y, withRed: 255, green: 255, blue: 255, alpha: 255)
+        isSameColor ? imageRepresentation.setPixel(foundColorPointer, atX: x, y: y) : imageRepresentation.setPixel(otherColorsPointer, atX: x, y: y)
         return imageRepresentation
     }
     
-    private func modifyImageRepresentation(imageRepresentation: NSBitmapImageRep, atX x: Int, atY y: Int, withRed red: Int, green: Int, blue: Int, alpha: Int) {
-        let p = UnsafeMutablePointer<Int>.alloc(4)
-        p.initialize(red)
-        p.successor().initialize(green)
-        p.successor().successor().initialize(blue)
-        p.successor().successor().successor().initialize(alpha)
-        imageRepresentation.setPixel(p, atX: x, y: y)
-        p.destroy(4)
-        p.dealloc(4)
+    private func cleanUpPointers() {
+        foundColorPointer.destroy(4)
+        foundColorPointer.dealloc(4)
+        otherColorsPointer.destroy(4)
+        otherColorsPointer.dealloc(4)
     }
 }
 
