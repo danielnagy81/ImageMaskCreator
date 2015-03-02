@@ -32,11 +32,15 @@ class ImageMaskCreator {
     }
     
     func createImageMask() {
-        setupInputArguments()
-        createImageFromPath(inputArguments[1])
+        let success = setupInputArgumentsWithSuccess()
+        if success {
+            createImageFromPath(inputArguments[1])
+        } else {
+            println("\nToo many/not enough input arguments given :'(\n")
+        }
     }
     
-    private func setupInputArguments() {
+    private func setupInputArgumentsWithSuccess() -> Bool {
         if inputArguments.count == 2 || inputArguments.count == 6 || inputArguments.count == 7 {
             
             if inputArguments.count == 6 || inputArguments.count == 7 {
@@ -53,8 +57,9 @@ class ImageMaskCreator {
             if inputArguments.count == 7 {
                 threshold = CGFloat((inputArguments[6] as NSString).floatValue)
             }
+            return true
         } else {
-            println("\nToo many/not enough input arguments given :'(\n")
+            return false
         }
     }
     
